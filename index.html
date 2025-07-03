@@ -1,0 +1,136 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Lagoon Volume Calculator</title>
+  <style>
+    body {
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f7f8;
+      color: #333;
+      padding: 30px;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background: #ffffff;
+      padding: 25px 30px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      color: #2c3e50;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: 500;
+    }
+
+    input[type="number"],
+    input[type="range"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+      box-sizing: border-box;
+    }
+
+    .range-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+    }
+
+    #volumeResult {
+      margin-top: 25px;
+      padding: 15px;
+      background: #e8f5e9;
+      border-left: 6px solid #2ecc71;
+      font-size: 1.3em;
+      font-weight: bold;
+      color: #2e7d32;
+      text-align: center;
+      border-radius: 8px;
+    }
+
+    @media (max-width: 600px) {
+      .container {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Lagoon Volume Calculator</h2>
+    <form oninput="calculateVolume()">
+      <label>Top Length (ft):
+        <input type="number" id="topLength" step="any" placeholder="e.g., 100">
+      </label>
+
+      <label>Top Width (ft):
+        <input type="number" id="topWidth" step="any" placeholder="e.g., 80">
+      </label>
+
+      <label>Total Depth (ft):
+        <input type="number" id="totalDepth" step="any" placeholder="e.g., 12">
+      </label>
+
+      <label>Freeboard Depth (ft):</label>
+      <div class="range-label">
+        <input type="range" id="freeboardDepth" min="0" max="3" step="0.1" value="0"
+          oninput="document.getElementById('freeboardValue').innerText = this.value + ' ft'">
+        <span id="freeboardValue">0 ft</span>
+      </div>
+
+      <div id="volumeResult">0 gallons</div>
+    </form>
+  </div>
+
+  <script>
+    function calculateVolume() {
+      const topLength = parseFloat(document.getElementById("topLength").value) || 0;
+      const topWidth = parseFloat(document.getElementById("topWidth").value) || 0;
+      const totalDepth = parseFloat(document.getElementById("totalDepth").value) || 0;
+      const freeboardDepth = parseFloat(document.getElementById("freeboardDepth").value) || 0;
+
+      const usableDepth = totalDepth - freeboardDepth;
+
+      if (usableDepth <= 0) {
+        document.getElementById("volumeResult").innerText =
+          "Freeboard must be less than total depth.";
+        return;
+      }
+
+      const bottomLength = topLength - 4 * usableDepth;
+      const bottomWidth = topWidth - 4 * usableDepth;
+
+      if (bottomLength <= 0 || bottomWidth <= 0) {
+        document.getElementById("volumeResult").innerText =
+          "Top dimensions too small for depth with 2:1 slope.";
+        return;
+      }
+
+      const topArea = topLength * topWidth;
+      const bottomArea = bottomLength * bottomWidth;
+      const avgArea = (topArea + bottomArea) / 2;
+
+      const volumeCubicFeet = avgArea * usableDepth;
+      const volumeGallons = volumeCubicFeet * 7.48052;
+
+      document.getElementById("volumeResult").innerText =
+        volumeGallons.toLocaleString(undefined, { maximumFractionDigits: 0 }) + " gallons";
+    }
+  </script>
+</body>
+</html>
